@@ -1,0 +1,27 @@
+{
+  "name": "the-side-stacker-game-backend",
+  "version": "1.0.0",
+  "description": "Backend Application for the Sider-Stacker Game",
+  "main": "index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "ts-node --esm index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/simonmrog/the-side-stacker-game-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/simonmrog/the-side-stacker-game-backend/issues"
+  },
+  "homepage": "https://github.com/simonmrog/the-side-stacker-game-backend#readme",
+  "dependencies": {
+    "ts-node": "^10.9.1"
+  }
+}
