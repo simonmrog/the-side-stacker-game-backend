@@ -1,7 +1,5 @@
-import { initServer } from "./src/server";
-
 import config from "./src/config/config";
+import App from "./src/server";
 
-const server = initServer();
-
-server.listen(config.PORT, () => console.log(`Server running on port ${config.PORT}`));
+const app = new App(config.PORT);
+app.run();

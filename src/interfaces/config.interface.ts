@@ -1,4 +1,5 @@
 export interface IConfig {
   ENV: string;
-  PORT: number | undefined;
+  PORT: number;
+  FRONTEND_URL: string;
 }
