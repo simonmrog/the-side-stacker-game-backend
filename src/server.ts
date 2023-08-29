@@ -4,7 +4,7 @@ import * as socketIO from "socket.io";
 
 import config from "./config/config";
 import router from "./routes";
-import { GameStatus } from "./services/sideStacker/sideStacker.interface";
+import { GameStatus, Move } from "./services/sideStacker/sideStacker.interface";
 import SideStackerGame from "./services/sideStacker/sideStacker";
 
 let game: SideStackerGame | null = null;
@@ -58,9 +58,16 @@ export default class App {
         this.io.emit("game-restarted", game?.gameStatus());
       });
 
+      socket.on("move", (move: Move) => {
+        console.log("[Event]: move");
+        game?.handleTurn(socket.id, move);
+        this.io.emit("player-moved", game?.gameStatus());
+        if (game?.status === GameStatus.FINISHED) this.io.emit("game-finished", game.gameStatus());
+      });
+
       socket.on("disconnect", (reason: socketIO.DisconnectReason) => {
         // remove the user from the game
-        if (game && game.players.includes(socket.id)) game.removePlayer(socket.id);
+        if (game?.players.includes(socket.id)) game.removePlayer(socket.id);
         // if no players left, remove the game instance
         if (!game?.players.length) {
           game = null;
