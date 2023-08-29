@@ -3,10 +3,11 @@ import http from "http";
 import * as socketIO from "socket.io";
 
 import config from "./config/config";
-
 import router from "./routes";
+import { GameStatus } from "./services/sideStacker/sideStacker.interface";
 import SideStackerGame from "./services/sideStacker/sideStacker";
 
+let game: SideStackerGame | null = null;
 export default class App {
   private server: http.Server;
   private port: number;
@@ -18,7 +19,7 @@ export default class App {
     // Server Setup
     const app = express();
     app.use("/", router);
-    const game = new SideStackerGame();
+    game = new SideStackerGame();
     app.set("game", game);
     this.server = http.createServer(app);
 
@@ -31,31 +32,37 @@ export default class App {
       },
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const players: any = {};
-
     this.io.on("connection", (socket: socketIO.Socket) => {
-      console.log(`User ${socket.id} connected successfully`);
+      console.log(`[Event]: User ${socket.id} connected successfully`);
 
-      players[socket.id] = {
-        message: "hello",
-        board: [],
-      };
+      console.log(game);
+      if (game?.status === GameStatus.WAITING_FOR_SECOND_USER)
+        this.io.emit("waiting-for-second-user", game.gameStatus());
 
-      socket.emit("message", "Hello " + socket.id);
+      socket.on("new-game", () => {
+        console.log("[Event]: new-game");
+        game = new SideStackerGame();
+        game.addPlayer(socket.id);
+        this.io.emit("game-created", game.gameStatus());
+      });
 
-      // socket.broadcast.emit("message", "Everybody, say hello to our new user: " + socket.id);
+      socket.on("join-game", () => {
+        console.log("[Event]: join-game");
+        game?.addPlayer(socket.id);
+        if (game?.players.length === 2) game?.start();
+        this.io.emit("player-joined", game?.gameStatus());
+      });
 
       socket.on("disconnect", (reason: socketIO.DisconnectReason) => {
-        delete players[socket.id];
-        console.log("User disconnected successfully: ", reason);
+        // remove the user from the game
+        if (game && game.players.includes(socket.id)) game.removePlayer(socket.id);
+        // if no players left, remove the game instance
+        if (!game?.players.length) {
+          game = null;
+          console.log("Game disconnected due to lack of players");
+        }
+        console.log("[Event]: User disconnected successfully:", reason);
       });
-
-      socket.on("message-response", message => {
-        console.log("[message-response event]: ", message);
-      });
-
-      this.io.emit("player-connected", players);
     });
   }
 
