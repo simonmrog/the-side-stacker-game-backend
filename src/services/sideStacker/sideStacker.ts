@@ -2,15 +2,19 @@ import { Game, GameStatus, Board, Move, PositionInBoard } from "./sideStacker.in
 
 export default class SideStackerGame implements Game {
   public status: GameStatus = GameStatus.NOT_STARTED;
-  public players: Array<string>;
   public board: Board;
-  public currentPlayer: string | null = null;
+  public players: Array<string>;
+  public currentPlayer: string | null;
+  public moves: Array<string>;
+  public result: string | null;
 
   constructor() {
     this.status = GameStatus.NOT_STARTED;
-    this.players = [];
     this.board = Array.from({ length: 7 }, () => Array(7).fill(""));
+    this.players = [];
     this.currentPlayer = null;
+    this.moves = [];
+    this.result = null;
   }
 
   start() {
@@ -21,14 +25,13 @@ export default class SideStackerGame implements Game {
     this.status = GameStatus.STARTED;
     this.board = Array.from({ length: 7 }, () => Array(7).fill(""));
     this.currentPlayer = this.players.length ? this.players[0] : null;
+    this.moves = [];
+    this.result = null;
   }
 
   endGame(result: string) {
-    console.log(result);
-    this.status = GameStatus.NOT_STARTED;
-    this.players = [];
-    this.board = Array.from({ length: 7 }, () => Array(7).fill(""));
-    this.currentPlayer = null;
+    this.status = GameStatus.FINISHED;
+    this.result = result;
   }
 
   addPlayer(player: string) {
@@ -69,12 +72,13 @@ export default class SideStackerGame implements Game {
 
   handleTurn(player: string, move: Move): void {
     const { row, column } = this.stackPiece(player, move);
+    const playersMove = `Player ${player} played (${move.row}, ${move.side})`;
+    this.moves.push(playersMove);
     if (this.checkForWin(player, row, column)) {
-      this.endGame(`[EVENT] ${player} Won`);
+      this.endGame(`${player} Won`);
     } else if (this.checkForDraw()) {
-      this.endGame("[EVENT] Draw");
+      this.endGame("The Game is a Draw");
     } else this.toggleTurn();
-    this.printBoard();
   }
 
   checkHorizontalWin(player: string, row: number, column: number): boolean {
@@ -200,10 +204,7 @@ export default class SideStackerGame implements Game {
       players: this.players,
       board: this.board,
       currentPlayer: this.currentPlayer,
+      result: this.result,
     };
-  }
-
-  printBoard(): void {
-    console.log(this.board);
   }
 }
