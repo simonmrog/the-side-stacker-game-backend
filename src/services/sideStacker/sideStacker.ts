@@ -17,6 +17,12 @@ export default class SideStackerGame implements Game {
     this.status = GameStatus.STARTED;
   }
 
+  restart() {
+    this.status = GameStatus.STARTED;
+    this.board = Array.from({ length: 7 }, () => Array(7).fill(""));
+    this.currentPlayer = this.players.length ? this.players[0] : null;
+  }
+
   endGame(result: string) {
     console.log(result);
     this.status = GameStatus.NOT_STARTED;

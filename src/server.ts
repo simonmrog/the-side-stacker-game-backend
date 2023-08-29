@@ -35,7 +35,6 @@ export default class App {
     this.io.on("connection", (socket: socketIO.Socket) => {
       console.log(`[Event]: User ${socket.id} connected successfully`);
 
-      console.log(game);
       if (game?.status === GameStatus.WAITING_FOR_SECOND_USER)
         this.io.emit("waiting-for-second-user", game.gameStatus());
 
@@ -51,6 +50,12 @@ export default class App {
         game?.addPlayer(socket.id);
         if (game?.players.length === 2) game?.start();
         this.io.emit("player-joined", game?.gameStatus());
+      });
+
+      socket.on("restart-game", () => {
+        console.log("[Event]: restart-game");
+        game?.restart();
+        this.io.emit("game-restarted", game?.gameStatus());
       });
 
       socket.on("disconnect", (reason: socketIO.DisconnectReason) => {
