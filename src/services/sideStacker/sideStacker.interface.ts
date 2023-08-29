@@ -8,15 +8,18 @@ export interface Game {
 
 export interface GameState {
   status: GameStatus;
-  players: Array<string>;
   board: Board;
+  players: Array<string>;
   currentPlayer: string;
+  moves: Array<string>;
+  result: string | null;
 }
 
 export enum GameStatus {
   NOT_STARTED = "not-started",
   WAITING_FOR_SECOND_USER = "waiting-for-second-user",
   STARTED = "started",
+  FINISHED = "finished",
 }
 
 export type Board = Array<Row>;
@@ -25,8 +28,10 @@ export type Row = Array<string>;
 
 export interface Move {
   row: number;
-  side: "right" | "left";
+  side: Side;
 }
+
+export type Side = "left" | "right";
 
 export interface PositionInBoard {
   row: number;
