@@ -1,27 +1,41 @@
-import { Game, Board, Move, PositionInBoard } from "./sideStacker.interface";
-
-const gameState = {
-  currentPlayer: "Player 1",
-};
+import { Game, GameStatus, Board, Move, PositionInBoard } from "./sideStacker.interface";
 
 export default class SideStackerGame implements Game {
-  board: Board;
+  public status: GameStatus = GameStatus.NOT_STARTED;
+  public players: Array<string>;
+  public board: Board;
+  public currentPlayer: string | null = null;
 
   constructor() {
+    this.status = GameStatus.NOT_STARTED;
+    this.players = [];
     this.board = Array.from({ length: 7 }, () => Array(7).fill(""));
+    this.currentPlayer = null;
   }
 
   start() {
-    this.board = Array.from({ length: 7 }, () => Array(7).fill(""));
-  }
-
-  restart() {
-    this.start();
+    this.status = GameStatus.STARTED;
   }
 
   endGame(result: string) {
     console.log(result);
-    this.restart();
+    this.status = GameStatus.NOT_STARTED;
+    this.players = [];
+    this.board = Array.from({ length: 7 }, () => Array(7).fill(""));
+    this.currentPlayer = null;
+  }
+
+  addPlayer(player: string) {
+    this.players.push(player);
+    if (this.players.length === 1) this.status = GameStatus.WAITING_FOR_SECOND_USER;
+    if (!this.currentPlayer) this.currentPlayer = player;
+  }
+
+  removePlayer(player: string) {
+    const playerIndex = this.players.indexOf(player);
+    this.players.splice(playerIndex, 1);
+    if (this.players.length === 1) this.status = GameStatus.WAITING_FOR_SECOND_USER;
+    if (this.currentPlayer === player) this.currentPlayer = null;
   }
 
   stackPiece(player: string, move: Move): PositionInBoard {
@@ -41,7 +55,10 @@ export default class SideStackerGame implements Game {
   }
 
   toggleTurn() {
-    gameState.currentPlayer = gameState.currentPlayer === "Player 1" ? "Player 2" : "Player 1";
+    // if the toggle turn occurs but there are no players in the game
+    const currentPlayerIndex = this.players.indexOf(this.currentPlayer!);
+    const nextIndex = 1 - currentPlayerIndex;
+    this.currentPlayer = this.players[nextIndex];
   }
 
   handleTurn(player: string, move: Move): void {
@@ -169,6 +186,15 @@ export default class SideStackerGame implements Game {
       this.checkVerticalWin(player, row, column) ||
       this.checkDiagonalWin(player, row, column)
     );
+  }
+
+  gameStatus() {
+    return {
+      status: this.status,
+      players: this.players,
+      board: this.board,
+      currentPlayer: this.currentPlayer,
+    };
   }
 
   printBoard(): void {
