@@ -1,8 +1,8 @@
-import { Game, GameStatus, Board, Move, PositionInBoard } from "./sideStacker.interface";
+import { IGame, GameStatus, TBoard, TRow, TCell, IMove, IPositionInBoard } from "./sideStacker.interface";
 
-export default class SideStackerGame implements Game {
+export default class SideStackerGame implements IGame {
   public status: GameStatus = GameStatus.NOT_STARTED;
-  public board: Board;
+  public board: TBoard;
   public players: Array<string>;
   public currentPlayer: string | null;
   public moves: Array<string>;
@@ -47,7 +47,7 @@ export default class SideStackerGame implements Game {
     if (this.currentPlayer === player) this.currentPlayer = null;
   }
 
-  stackPiece(player: string, move: Move): PositionInBoard {
+  stackPiece(player: string, move: IMove): IPositionInBoard {
     let column;
     const { row, side } = move;
     if (side === "right") {
@@ -70,7 +70,7 @@ export default class SideStackerGame implements Game {
     this.currentPlayer = this.players[nextIndex];
   }
 
-  handleTurn(player: string, move: Move): void {
+  handleTurn(player: string, move: IMove): void {
     const { row, column } = this.stackPiece(player, move);
     const playersMove = `Player ${player} played (${move.row}, ${move.side})`;
     this.moves.push(playersMove);
@@ -185,8 +185,8 @@ export default class SideStackerGame implements Game {
   }
 
   checkForDraw(): boolean {
-    return this.board.reduce((draw, row) => {
-      return draw && row.every(cell => cell !== "");
+    return this.board.reduce((draw: boolean, row: TRow) => {
+      return draw && row.every((cell: TCell) => cell !== "");
     }, true);
   }
 
@@ -204,6 +204,7 @@ export default class SideStackerGame implements Game {
       players: this.players,
       board: this.board,
       currentPlayer: this.currentPlayer,
+      moves: this.moves,
       result: this.result,
     };
   }
