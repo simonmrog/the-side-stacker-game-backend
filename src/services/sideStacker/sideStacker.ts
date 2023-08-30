@@ -6,7 +6,7 @@ export default class SideStackerGame implements IGame {
   public players: Array<string>;
   public currentPlayer: string | null;
   public moves: Array<string>;
-  public result: string | null;
+  public winnerId: string | null;
 
   constructor() {
     this.status = GameStatus.NOT_STARTED;
@@ -14,7 +14,7 @@ export default class SideStackerGame implements IGame {
     this.players = [];
     this.currentPlayer = null;
     this.moves = [];
-    this.result = null;
+    this.winnerId = null;
   }
 
   start() {
@@ -26,12 +26,12 @@ export default class SideStackerGame implements IGame {
     this.board = Array.from({ length: 7 }, () => Array(7).fill(""));
     this.currentPlayer = this.players.length ? this.players[0] : null;
     this.moves = [];
-    this.result = null;
+    this.winnerId = null;
   }
 
-  endGame(result: string) {
+  endGame(winnerId: string) {
     this.status = GameStatus.FINISHED;
-    this.result = result;
+    this.winnerId = winnerId;
   }
 
   addPlayer(player: string) {
@@ -75,9 +75,9 @@ export default class SideStackerGame implements IGame {
     const playersMove = `Player ${player} played (${move.row}, ${move.side})`;
     this.moves.push(playersMove);
     if (this.checkForWin(player, row, column)) {
-      this.endGame(`${player} Won`);
+      this.endGame(player);
     } else if (this.checkForDraw()) {
-      this.endGame("The Game is a Draw");
+      this.endGame("draw");
     } else this.toggleTurn();
   }
 
@@ -205,7 +205,7 @@ export default class SideStackerGame implements IGame {
       board: this.board,
       currentPlayer: this.currentPlayer,
       moves: this.moves,
-      result: this.result,
+      winnerId: this.winnerId,
     };
   }
 }

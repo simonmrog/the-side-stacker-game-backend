@@ -12,7 +12,7 @@ export interface IGameState {
   players: Array<string>;
   currentPlayer: string | null;
   moves: Array<string>;
-  result: string | null;
+  winnerId: string | null;
 }
 
 export enum GameStatus {
