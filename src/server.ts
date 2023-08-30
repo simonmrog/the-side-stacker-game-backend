@@ -4,7 +4,7 @@ import * as socketIO from "socket.io";
 
 import config from "./config/config";
 import router from "./routes";
-import { GameStatus, Move } from "./services/sideStacker/sideStacker.interface";
+import { GameStatus, IMove } from "./services/sideStacker/sideStacker.interface";
 import SideStackerGame from "./services/sideStacker/sideStacker";
 
 let game: SideStackerGame | null = null;
@@ -41,7 +41,6 @@ export default class App {
       socket.on("new-game", () => {
         console.log("[Event]: new-game");
         game = new SideStackerGame();
-        game.addPlayer(socket.id);
         this.io.emit("game-created", game.gameStatus());
       });
 
@@ -50,6 +49,7 @@ export default class App {
         game?.addPlayer(socket.id);
         if (game?.players.length === 2) game?.start();
         this.io.emit("player-joined", game?.gameStatus());
+        socket.emit("player-id-generated", socket.id);
       });
 
       socket.on("restart-game", () => {
@@ -58,7 +58,7 @@ export default class App {
         this.io.emit("game-restarted", game?.gameStatus());
       });
 
-      socket.on("move", (move: Move) => {
+      socket.on("move", (move: IMove) => {
         console.log("[Event]: move");
         game?.handleTurn(socket.id, move);
         this.io.emit("player-moved", game?.gameStatus());
@@ -69,9 +69,10 @@ export default class App {
         // remove the user from the game
         if (game?.players.includes(socket.id)) game.removePlayer(socket.id);
         // if no players left, remove the game instance
-        if (!game?.players.length) {
+        if (game?.players.length !== 2) {
           game = null;
           console.log("Game disconnected due to lack of players");
+          socket.broadcast.emit("game-disconnected", { playerId: socket.id, game });
         }
         console.log("[Event]: User disconnected successfully:", reason);
       });
