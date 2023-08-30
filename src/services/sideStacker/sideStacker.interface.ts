@@ -1,16 +1,16 @@
-export interface Game {
+export interface IGame {
   start(): void;
   endGame(result: string): void;
-  handleTurn(player: string, move: Move): void;
+  handleTurn(player: string, move: IMove): void;
   checkForDraw(): boolean;
   checkForWin(player: string, row: number, column: number): boolean;
 }
 
-export interface GameState {
+export interface IGameState {
   status: GameStatus;
-  board: Board;
+  board: TBoard;
   players: Array<string>;
-  currentPlayer: string;
+  currentPlayer: string | null;
   moves: Array<string>;
   result: string | null;
 }
@@ -22,18 +22,25 @@ export enum GameStatus {
   FINISHED = "finished",
 }
 
-export type Board = Array<Row>;
+export type TBoard = Array<TRow>;
 
-export type Row = Array<string>;
+export type TRow = Array<string>;
 
-export interface Move {
+export type TCell = string;
+
+export interface IMove {
   row: number;
-  side: Side;
+  side: ISide;
 }
 
-export type Side = "left" | "right";
+export type ISide = "left" | "right";
 
-export interface PositionInBoard {
+export interface IPositionInBoard {
   row: number;
   column: number;
+}
+
+export interface IGameStateEvent {
+  playerId: string;
+  gameState: IGameState;
 }
