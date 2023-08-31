@@ -7,5 +7,7 @@ export class Player {
     this.color = this.getRandomColor();
   }
 
-  getRandomColor(): string {}
+  getRandomColor(): string {
+    return "red";
+  }
 }
