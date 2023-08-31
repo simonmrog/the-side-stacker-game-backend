@@ -29,9 +29,9 @@ export enum GameStatus {
 
 export type TBoard = Array<TRow>;
 
-export type TRow = Array<string>;
+export type TRow = Array<TCell>;
 
-export type TCell = string;
+export type TCell = IPlayer | null;
 
 export interface IMove {
   row: number;

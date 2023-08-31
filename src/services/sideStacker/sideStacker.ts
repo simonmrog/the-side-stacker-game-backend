@@ -1,18 +1,18 @@
 import { errorCatalog } from "../../config/errorCatalog";
-import { Player } from "../../models/player";
+import { IPlayer, Player } from "../../models/player";
 import { IGame, GameStatus, TBoard, TRow, TCell, IMove, IPositionInBoard } from "./sideStacker.interface";
 
 export default class SideStackerGame implements IGame {
   public status: GameStatus = GameStatus.NOT_STARTED;
   public board: TBoard;
-  public players: Array<Player>;
+  public players: Array<IPlayer>;
   public currentPlayer: string | null;
   public moves: Array<string>;
   public winnerId: string | null;
 
   constructor() {
     this.status = GameStatus.NOT_STARTED;
-    this.board = Array.from({ length: 7 }, () => Array(7).fill(""));
+    this.board = Array.from({ length: 7 }, () => Array(7).fill(null));
     this.players = [];
     this.currentPlayer = null;
     this.moves = [];
@@ -25,7 +25,7 @@ export default class SideStackerGame implements IGame {
 
   restart() {
     this.status = GameStatus.STARTED;
-    this.board = Array.from({ length: 7 }, () => Array(7).fill(""));
+    this.board = Array.from({ length: 7 }, () => Array(7).fill(null));
     this.currentPlayer = this.players.length ? this.players[0].id : null;
     this.moves = [];
     this.winnerId = null;
@@ -50,20 +50,20 @@ export default class SideStackerGame implements IGame {
   }
 
   fullRow(rIndex: number): boolean {
-    return this.board[rIndex].every((cell: TCell) => cell !== "");
+    return this.board[rIndex].every((cell: TCell) => cell !== null);
   }
 
-  stackPiece(player: string, move: IMove): IPositionInBoard | null {
+  stackPiece(player: IPlayer, move: IMove): IPositionInBoard | null {
     let column;
     const { row, side } = move;
     if (this.fullRow(row)) return null;
     if (side === "right") {
       const rowLength = this.board[row].length;
-      const columnRev = Array.from(this.board[row]).reverse().indexOf("");
+      const columnRev = Array.from(this.board[row]).reverse().indexOf(null);
       column = rowLength - 1 - columnRev;
       this.board[row][column] = player;
     } else {
-      column = this.board[row].indexOf("");
+      column = this.board[row].indexOf(null);
       this.board[row][column] = player;
     }
 
@@ -77,14 +77,17 @@ export default class SideStackerGame implements IGame {
     this.currentPlayer = this.players[nextIndex].id;
   }
 
-  handleTurn(player: string, move: IMove): void {
-    const moveIndices = this.stackPiece(player, move);
+  handleTurn(playerId: string, move: IMove): void {
+    const player = this.players.find(p => p.id === playerId);
+    if (!player) return;
+    const playerData = { id: player.id, color: player.color };
+    const moveIndices = this.stackPiece(playerData, move);
     // no move was performed because the row is full
     if (!moveIndices) throw new Error(errorCatalog.INVALID_MOVE.FULL_ROW);
-    const playersMove = `Player ${player} played (${move.row}, ${move.side})`;
+    const playersMove = `Player ${playerId} played (${move.row}, ${move.side})`;
     this.moves.push(playersMove);
-    if (this.checkForWin(player, moveIndices.row, moveIndices.column)) {
-      this.endGame(player);
+    if (this.checkForWin(playerId, moveIndices.row, moveIndices.column)) {
+      this.endGame(playerId);
     } else if (this.checkForDraw()) {
       this.endGame("draw");
     } else this.toggleTurn();
@@ -98,7 +101,7 @@ export default class SideStackerGame implements IGame {
     ): void => {
       for (let step = 1, shouldStep = true; shouldStep && count < winCondition; step++) {
         const c = column + direction * step;
-        if (noOverflowCheck(row, c) && this.board[row][c] === player) count++;
+        if (noOverflowCheck(row, c) && this.board[row][c] && this.board[row][c]!.id === player) count++;
         else shouldStep = false;
       }
     };
@@ -129,7 +132,7 @@ export default class SideStackerGame implements IGame {
     ): void => {
       for (let step = 1, shouldStep = true; shouldStep && count < winCondition; step++) {
         const r = row + direction * step;
-        if (noOverflowCheck(r, column) && this.board[r][column] === player) count++;
+        if (noOverflowCheck(r, column) && this.board[r][column] && this.board[r][column]!.id === player) count++;
         else shouldStep = false;
       }
     };
@@ -161,7 +164,7 @@ export default class SideStackerGame implements IGame {
       for (let step = 1, shouldStep = true; shouldStep && count < winCondition; step++) {
         const r = row + direction[0] * step;
         const c = column + direction[1] * step;
-        if (noOverflowCheck(r, c) && this.board[r][c] === player) count++;
+        if (noOverflowCheck(r, c) && this.board[r][c] && this.board[r][c]!.id === player) count++;
         else shouldStep = false;
       }
     };
@@ -195,7 +198,7 @@ export default class SideStackerGame implements IGame {
 
   checkForDraw(): boolean {
     return this.board.reduce((draw: boolean, row: TRow) => {
-      return draw && row.every((cell: TCell) => cell !== "");
+      return draw && row.every((cell: TCell) => cell !== null);
     }, true);
   }
 
