@@ -9,10 +9,15 @@ export interface IGame {
 export interface IGameState {
   status: GameStatus;
   board: TBoard;
-  players: Array<string>;
+  players: Array<Player>;
   currentPlayer: string | null;
   moves: Array<string>;
   winnerId: string | null;
+}
+
+export interface Player {
+  id: string;
+  color: string;
 }
 
 export enum GameStatus {
@@ -41,6 +46,6 @@ export interface IPositionInBoard {
 }
 
 export interface IGameStateEvent {
-  playerId: string;
+  player: Player;
   gameState: IGameState;
 }

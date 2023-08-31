@@ -4,6 +4,7 @@ import * as socketIO from "socket.io";
 
 import config from "./config/config";
 import router from "./routes";
+import { Player } from "./models/player";
 import { GameStatus, IMove } from "./services/sideStacker/sideStacker.interface";
 import SideStackerGame from "./services/sideStacker/sideStacker";
 
@@ -46,10 +47,11 @@ export default class App {
 
       socket.on("join-game", () => {
         console.log("[Event]: join-game");
-        game?.addPlayer(socket.id);
+        const player = new Player(socket.id);
+        game?.addPlayer(player);
         if (game?.players.length === 2) game?.start();
         this.io.emit("player-joined", game?.gameStatus());
-        socket.emit("player-id-generated", socket.id);
+        socket.emit("player-generated", player);
       });
 
       socket.on("restart-game", () => {
@@ -59,20 +61,29 @@ export default class App {
       });
 
       socket.on("move", (move: IMove) => {
-        console.log("[Event]: move");
-        game?.handleTurn(socket.id, move);
-        this.io.emit("player-moved", game?.gameStatus());
-        if (game?.status === GameStatus.FINISHED) this.io.emit("game-finished", game.gameStatus());
+        try {
+          console.log("[Event]: move");
+          game?.handleTurn(socket.id, move);
+          this.io.emit("player-moved", game?.gameStatus());
+          if (game?.status === GameStatus.FINISHED) this.io.emit("game-finished", game.gameStatus());
+        } catch (err: unknown) {
+          console.error("[Move Event Error]", err);
+          socket.emit("exception", { errorMessage: (err as Error).message });
+        }
       });
 
       socket.on("disconnect", (reason: socketIO.DisconnectReason) => {
         // remove the user from the game
-        if (game?.players.includes(socket.id)) game.removePlayer(socket.id);
-        // if no players left, remove the game instance
-        if (game?.players.length !== 2) {
-          game = null;
-          console.log("Game disconnected due to lack of players");
-          socket.broadcast.emit("game-disconnected", { playerId: socket.id, game });
+        const playerFound = game?.players.find(player => player.id === socket.id);
+        // if the player is in the game
+        if (playerFound) {
+          game?.removePlayer(socket.id);
+          // if no players left, remove the game instance
+          if (game?.players.length !== 2) {
+            game = null;
+            console.log("Game disconnected due to lack of players");
+            socket.broadcast.emit("game-disconnected", { player: playerFound, game });
+          }
         }
         console.log("[Event]: User disconnected successfully:", reason);
       });

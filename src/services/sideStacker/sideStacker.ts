@@ -1,9 +1,11 @@
+import { errorCatalog } from "../../config/errorCatalog";
+import { Player } from "../../models/player";
 import { IGame, GameStatus, TBoard, TRow, TCell, IMove, IPositionInBoard } from "./sideStacker.interface";
 
 export default class SideStackerGame implements IGame {
   public status: GameStatus = GameStatus.NOT_STARTED;
   public board: TBoard;
-  public players: Array<string>;
+  public players: Array<Player>;
   public currentPlayer: string | null;
   public moves: Array<string>;
   public winnerId: string | null;
@@ -24,7 +26,7 @@ export default class SideStackerGame implements IGame {
   restart() {
     this.status = GameStatus.STARTED;
     this.board = Array.from({ length: 7 }, () => Array(7).fill(""));
-    this.currentPlayer = this.players.length ? this.players[0] : null;
+    this.currentPlayer = this.players.length ? this.players[0].id : null;
     this.moves = [];
     this.winnerId = null;
   }
@@ -34,22 +36,27 @@ export default class SideStackerGame implements IGame {
     this.winnerId = winnerId;
   }
 
-  addPlayer(player: string) {
+  addPlayer(player: Player) {
     this.players.push(player);
     if (this.players.length === 1) this.status = GameStatus.WAITING_FOR_SECOND_USER;
-    if (!this.currentPlayer) this.currentPlayer = player;
+    if (!this.currentPlayer) this.currentPlayer = player.id;
   }
 
-  removePlayer(player: string) {
-    const playerIndex = this.players.indexOf(player);
+  removePlayer(playerId: string) {
+    const playerIndex = this.players.findIndex(player => player.id === playerId);
     this.players.splice(playerIndex, 1);
     if (this.players.length === 1) this.status = GameStatus.WAITING_FOR_SECOND_USER;
-    if (this.currentPlayer === player) this.currentPlayer = null;
+    if (this.currentPlayer === playerId) this.currentPlayer = null;
   }
 
-  stackPiece(player: string, move: IMove): IPositionInBoard {
+  fullRow(rIndex: number): boolean {
+    return this.board[rIndex].every((cell: TCell) => cell !== "");
+  }
+
+  stackPiece(player: string, move: IMove): IPositionInBoard | null {
     let column;
     const { row, side } = move;
+    if (this.fullRow(row)) return null;
     if (side === "right") {
       const rowLength = this.board[row].length;
       const columnRev = Array.from(this.board[row]).reverse().indexOf("");
@@ -65,16 +72,18 @@ export default class SideStackerGame implements IGame {
 
   toggleTurn() {
     // if the toggle turn occurs but there are no players in the game
-    const currentPlayerIndex = this.players.indexOf(this.currentPlayer!);
+    const currentPlayerIndex = this.players.findIndex(player => player.id === this.currentPlayer);
     const nextIndex = 1 - currentPlayerIndex;
-    this.currentPlayer = this.players[nextIndex];
+    this.currentPlayer = this.players[nextIndex].id;
   }
 
   handleTurn(player: string, move: IMove): void {
-    const { row, column } = this.stackPiece(player, move);
+    const moveIndices = this.stackPiece(player, move);
+    // no move was performed because the row is full
+    if (!moveIndices) throw new Error(errorCatalog.INVALID_MOVE.FULL_ROW);
     const playersMove = `Player ${player} played (${move.row}, ${move.side})`;
     this.moves.push(playersMove);
-    if (this.checkForWin(player, row, column)) {
+    if (this.checkForWin(player, moveIndices.row, moveIndices.column)) {
       this.endGame(player);
     } else if (this.checkForDraw()) {
       this.endGame("draw");
