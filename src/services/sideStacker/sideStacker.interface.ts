@@ -9,13 +9,13 @@ export interface IGame {
 export interface IGameState {
   status: GameStatus;
   board: TBoard;
-  players: Array<Player>;
+  players: Array<IPlayer>;
   currentPlayer: string | null;
   moves: Array<string>;
   winnerId: string | null;
 }
 
-export interface Player {
+export interface IPlayer {
   id: string;
   color: string;
 }
@@ -46,6 +46,6 @@ export interface IPositionInBoard {
 }
 
 export interface IGameStateEvent {
-  player: Player;
+  player: IPlayer;
   gameState: IGameState;
 }

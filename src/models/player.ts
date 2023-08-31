@@ -1,4 +1,9 @@
-export class Player {
+export interface IPlayer {
+  id: string;
+  color: string;
+}
+
+export class Player implements IPlayer {
   public id: string;
   public color: string;
 
@@ -8,6 +13,7 @@ export class Player {
   }
 
   getRandomColor(): string {
-    return "red";
+    const randomCode = Math.floor(Math.random() * 16777215).toString(16);
+    return `#${randomCode}`;
   }
 }
