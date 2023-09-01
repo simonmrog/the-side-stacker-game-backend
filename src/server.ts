@@ -3,6 +3,7 @@ import http from "http";
 import * as socketIO from "socket.io";
 
 import config from "./config/config";
+import logger from "./utils/logger";
 import router from "./routes";
 import { Player } from "./models/player";
 import { GameStatus, IMove } from "./services/sideStacker/sideStacker.interface";
@@ -34,20 +35,20 @@ export default class App {
     });
 
     this.io.on("connection", (socket: socketIO.Socket) => {
-      console.log(`[Event]: User ${socket.id} connected successfully`);
+      logger.info(`[Event]: User ${socket.id} connected successfully`);
 
       if (game?.status === GameStatus.WAITING_FOR_SECOND_USER)
         this.io.emit("waiting-for-second-user", game.getGameState());
 
       socket.on("new-game", () => {
-        console.log("[Event]: new-game");
+        logger.info("[Event]: new-game");
         game = new SideStackerGame();
         this.io.emit("game-created", game.getGameState());
       });
 
       // The game already exists when this event is emmited
       socket.on("join-game", () => {
-        console.log("[Event]: join-game");
+        logger.info("[Event]: join-game");
         const randomColor = game!.getRandomColor();
         const playerIndex = game!.players.findIndex(p => p.id === socket.id);
         const name = playerIndex !== -1 ? `Player ${playerIndex + 1}` : `Player ${game!.players.length + 1}`;
@@ -60,14 +61,14 @@ export default class App {
 
       // The game already exists when this event is emmited
       socket.on("restart-game", () => {
-        console.log("[Event]: restart-game");
+        logger.info("[Event]: restart-game");
         game!.restart();
         this.io.emit("game-restarted", game!.getGameState());
       });
 
       socket.on("move", (move: IMove) => {
         try {
-          console.log("[Event]: move");
+          logger.info("[Event]: move");
           game?.handleTurn(socket.id, move);
           this.io.emit("player-moved", game?.getGameState());
           if (game?.status === GameStatus.FINISHED) this.io.emit("game-finished", game.getGameState());
@@ -86,16 +87,16 @@ export default class App {
           // if no players left, remove the game instance
           if (game.players.length !== 2) {
             game = null;
-            console.log("Game disconnected due to lack of players");
+            logger.info("Game disconnected due to lack of players");
             socket.broadcast.emit("game-disconnected", { player: playerFound, gameState: game });
           }
         }
-        console.log("[Event]: User disconnected successfully:", reason);
+        logger.info("[Event]: User disconnected successfully:", reason);
       });
     });
   }
 
   run(): void {
-    this.server.listen(this.port, () => console.log(`Server running on port ${this.port}`));
+    this.server.listen(this.port, () => logger.info(`Server running on port ${this.port}`));
   }
 }
