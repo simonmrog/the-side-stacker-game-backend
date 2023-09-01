@@ -1,0 +1,9 @@
+[
+  [null, null, null, null, null, null, null],
+  [{ "id": "some-id-1", "color": "some-color-1", "name": "some-name-1" }, null, null, null, null, null, null],
+  [{ "id": "some-id-1", "color": "some-color-1", "name": "some-name-1" }, null, null, null, null, null, null],
+  [{ "id": "some-id-1", "color": "some-color-1", "name": "some-name-1" }, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null]
+]

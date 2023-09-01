@@ -1,3 +1,5 @@
+import { IPlayer } from "../../models/player";
+
 export interface IGame {
   start(): void;
   endGame(result: string): void;
@@ -13,11 +15,6 @@ export interface IGameState {
   currentPlayer: string | null;
   moves: Array<string>;
   winnerId: string | null;
-}
-
-export interface IPlayer {
-  id: string;
-  color: string;
 }
 
 export enum GameStatus {

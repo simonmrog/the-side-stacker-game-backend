@@ -1,3 +1,4 @@
+import config from "../../config/config";
 import { errorCatalog } from "../../config/errorCatalog";
 import { IPlayer, Player } from "../../models/player";
 import { IGame, GameStatus, TBoard, TRow, TCell, IMove, IPositionInBoard } from "./sideStacker.interface";
@@ -12,7 +13,7 @@ export default class SideStackerGame implements IGame {
   public winnerId: string | null;
 
   constructor() {
-    this.colorsBag = [0, 120, 240];
+    this.colorsBag = config.GAME_COLOR_BAG;
     this.status = GameStatus.NOT_STARTED;
     this.board = Array.from({ length: 7 }, () => Array(7).fill(null));
     this.players = [];
@@ -89,13 +90,17 @@ export default class SideStackerGame implements IGame {
   toggleTurn() {
     // if the toggle turn occurs but there are no players in the game
     const currentPlayerIndex = this.players.findIndex(player => player.id === this.currentPlayer);
+    if (currentPlayerIndex === -1) throw new Error(errorCatalog.INVALID_GAME.NOT_ENOUGH_PLAYERS);
     const nextIndex = 1 - currentPlayerIndex;
-    this.currentPlayer = this.players[nextIndex].id;
+    const nextPlayer = this.players[nextIndex];
+    console.log(this.players[nextIndex], nextIndex);
+    if (!nextPlayer) throw new Error(errorCatalog.INVALID_PLAYER.PLAYER_NOT_FOUND);
+    this.currentPlayer = nextPlayer.id;
   }
 
   handleTurn(playerId: string, move: IMove): void {
     const player = this.players.find(p => p.id === playerId);
-    if (!player) return;
+    if (!player || this.status !== GameStatus.STARTED) return;
     const moveIndices = this.stackPiece(player, move);
     // no move was performed because the row is full
     if (!moveIndices) throw new Error(errorCatalog.INVALID_MOVE.FULL_ROW);
