@@ -95,11 +95,10 @@ export default class SideStackerGame implements IGame {
   handleTurn(playerId: string, move: IMove): void {
     const player = this.players.find(p => p.id === playerId);
     if (!player) return;
-    const playerData = { id: player.id, color: player.color };
-    const moveIndices = this.stackPiece(playerData, move);
+    const moveIndices = this.stackPiece(player, move);
     // no move was performed because the row is full
     if (!moveIndices) throw new Error(errorCatalog.INVALID_MOVE.FULL_ROW);
-    const playersMove = `Player ${playerId} played (${move.row}, ${move.side})`;
+    const playersMove = `${player.name} played (${move.row}, ${move.side})`;
     this.moves.push(playersMove);
     if (this.checkForWin(playerId, moveIndices.row, moveIndices.column)) {
       this.endGame(playerId);

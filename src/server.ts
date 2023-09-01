@@ -49,7 +49,8 @@ export default class App {
       socket.on("join-game", () => {
         console.log("[Event]: join-game");
         const randomColor = game!.getRandomColor();
-        const player = new Player(socket.id, randomColor);
+        const name = `Player ${game!.players.length + 1}`;
+        const player = new Player(socket.id, randomColor, name);
         game!.addPlayer(player);
         if (game!.players.length === 2) game!.start();
         this.io.emit("player-joined", game!.getGameState());
