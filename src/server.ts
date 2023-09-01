@@ -37,12 +37,12 @@ export default class App {
       console.log(`[Event]: User ${socket.id} connected successfully`);
 
       if (game?.status === GameStatus.WAITING_FOR_SECOND_USER)
-        this.io.emit("waiting-for-second-user", game.gameStatus());
+        this.io.emit("waiting-for-second-user", game.getGameState());
 
       socket.on("new-game", () => {
         console.log("[Event]: new-game");
         game = new SideStackerGame();
-        this.io.emit("game-created", game.gameStatus());
+        this.io.emit("game-created", game.getGameState());
       });
 
       // The game already exists when this event is emmited
@@ -52,7 +52,7 @@ export default class App {
         const player = new Player(socket.id, randomColor);
         game!.addPlayer(player);
         if (game!.players.length === 2) game!.start();
-        this.io.emit("player-joined", game!.gameStatus());
+        this.io.emit("player-joined", game!.getGameState());
         socket.emit("player-generated", player);
       });
 
@@ -60,15 +60,15 @@ export default class App {
       socket.on("restart-game", () => {
         console.log("[Event]: restart-game");
         game!.restart();
-        this.io.emit("game-restarted", game!.gameStatus());
+        this.io.emit("game-restarted", game!.getGameState());
       });
 
       socket.on("move", (move: IMove) => {
         try {
           console.log("[Event]: move");
           game?.handleTurn(socket.id, move);
-          this.io.emit("player-moved", game?.gameStatus());
-          if (game?.status === GameStatus.FINISHED) this.io.emit("game-finished", game.gameStatus());
+          this.io.emit("player-moved", game?.getGameState());
+          if (game?.status === GameStatus.FINISHED) this.io.emit("game-finished", game.getGameState());
         } catch (err: unknown) {
           console.error("[Move Event Error]", err);
           socket.emit("exception", { errorMessage: (err as Error).message });
@@ -79,13 +79,13 @@ export default class App {
         // remove the user from the game
         const playerFound = game?.players.find(player => player.id === socket.id);
         // if the player is in the game
-        if (playerFound) {
-          game?.removePlayer(socket.id);
+        if (game && playerFound) {
+          game.removePlayer(socket.id);
           // if no players left, remove the game instance
-          if (game?.players.length !== 2) {
+          if (game.players.length !== 2) {
             game = null;
             console.log("Game disconnected due to lack of players");
-            socket.broadcast.emit("game-disconnected", { player: playerFound, game });
+            socket.broadcast.emit("game-disconnected", { player: playerFound, gameState: game });
           }
         }
         console.log("[Event]: User disconnected successfully:", reason);
