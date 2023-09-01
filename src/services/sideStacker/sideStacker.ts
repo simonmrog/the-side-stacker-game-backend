@@ -225,7 +225,7 @@ export default class SideStackerGame implements IGame {
     return horizontalWin || verticalWin || diagonalWin;
   }
 
-  gameStatus() {
+  getGameState() {
     return {
       status: this.status,
       players: this.players,
