@@ -28,10 +28,11 @@ export default class SideStackerGame implements IGame {
     return `hsla(${randomHue}, 100%, 70%, 1)`;
   }
 
-  getRandomTurn() {
+  getRandomTurn(): string | null {
     // generates either 0 or 1 randomly
     const randomIndex = Math.round(Math.random());
     const player = this.players[randomIndex];
+    if (!player) return null;
     return player.id;
   }
 

@@ -49,7 +49,9 @@ export default class App {
       socket.on("join-game", () => {
         console.log("[Event]: join-game");
         const randomColor = game!.getRandomColor();
-        const name = `Player ${game!.players.length + 1}`;
+        console.log(game, "gameee");
+        const playerIndex = game!.players.findIndex(p => p.id === socket.id);
+        const name = playerIndex !== -1 ? `Player ${playerIndex + 1}` : `Player ${game!.players.length + 1}`;
         const player = new Player(socket.id, randomColor, name);
         game!.addPlayer(player);
         if (game!.players.length === 2) game!.start();
