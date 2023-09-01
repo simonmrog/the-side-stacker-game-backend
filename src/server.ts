@@ -45,19 +45,22 @@ export default class App {
         this.io.emit("game-created", game.gameStatus());
       });
 
+      // The game already exists when this event is emmited
       socket.on("join-game", () => {
         console.log("[Event]: join-game");
-        const player = new Player(socket.id);
-        game?.addPlayer(player);
-        if (game?.players.length === 2) game?.start();
-        this.io.emit("player-joined", game?.gameStatus());
+        const randomColor = game!.getRandomColor();
+        const player = new Player(socket.id, randomColor);
+        game!.addPlayer(player);
+        if (game!.players.length === 2) game!.start();
+        this.io.emit("player-joined", game!.gameStatus());
         socket.emit("player-generated", player);
       });
 
+      // The game already exists when this event is emmited
       socket.on("restart-game", () => {
         console.log("[Event]: restart-game");
-        game?.restart();
-        this.io.emit("game-restarted", game?.gameStatus());
+        game!.restart();
+        this.io.emit("game-restarted", game!.gameStatus());
       });
 
       socket.on("move", (move: IMove) => {

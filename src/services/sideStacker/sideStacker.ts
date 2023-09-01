@@ -3,6 +3,7 @@ import { IPlayer, Player } from "../../models/player";
 import { IGame, GameStatus, TBoard, TRow, TCell, IMove, IPositionInBoard } from "./sideStacker.interface";
 
 export default class SideStackerGame implements IGame {
+  private colorsBag: Array<number>;
   public status: GameStatus = GameStatus.NOT_STARTED;
   public board: TBoard;
   public players: Array<IPlayer>;
@@ -11,12 +12,20 @@ export default class SideStackerGame implements IGame {
   public winnerId: string | null;
 
   constructor() {
+    this.colorsBag = [0, 120, 240];
     this.status = GameStatus.NOT_STARTED;
     this.board = Array.from({ length: 7 }, () => Array(7).fill(null));
     this.players = [];
     this.currentPlayer = null;
     this.moves = [];
     this.winnerId = null;
+  }
+
+  getRandomColor(): string {
+    const randomIndex = Math.floor(Math.random() * this.colorsBag.length);
+    const randomHue = this.colorsBag[randomIndex];
+    this.colorsBag.splice(randomIndex, 1);
+    return `hsla(${randomHue}, 100%, 70%, 1)`;
   }
 
   getRandomTurn() {
@@ -34,7 +43,7 @@ export default class SideStackerGame implements IGame {
   restart() {
     this.status = GameStatus.STARTED;
     this.board = Array.from({ length: 7 }, () => Array(7).fill(null));
-    this.currentPlayer = null;
+    this.currentPlayer = this.getRandomTurn();
     this.moves = [];
     this.winnerId = null;
   }
