@@ -175,17 +175,16 @@ export default class SideStackerGame implements IGame {
       winCondition: number,
       noOverflowCheck: (r: number, c: number) => boolean,
       direction: [number, number]
-    ): void => {
+    ): number => {
+      let count = 0;
       for (let step = 1, shouldStep = true; shouldStep && count < winCondition; step++) {
         const r = row + direction[0] * step;
         const c = column + direction[1] * step;
         if (noOverflowCheck(r, c) && this.board[r][c] && this.board[r][c]!.id === player) count++;
         else shouldStep = false;
       }
+      return count;
     };
-
-    // should start at 1 to count the position (row, column) itself
-    let count = 1;
 
     const minRow = 0;
     const minColumn = 0;
@@ -199,16 +198,18 @@ export default class SideStackerGame implements IGame {
     const downLeftCheck = (r: number, c: number) => r < maxRow && c >= minColumn;
 
     // up right check
-    checkByDiagonal(winCondition, upRightCheck, [-1, 1]);
+    const upRightCount = checkByDiagonal(winCondition, upRightCheck, [-1, 1]);
     // down right check
-    checkByDiagonal(winCondition, downRightCheck, [1, 1]);
+    const downRightCount = checkByDiagonal(winCondition, downRightCheck, [1, 1]);
     // up left check
-    checkByDiagonal(winCondition, upLeftCheck, [-1, -1]);
+    const upLeftCount = checkByDiagonal(winCondition, upLeftCheck, [-1, -1]);
     // down left check
-    checkByDiagonal(winCondition, downLeftCheck, [1, -1]);
+    const downLeftCount = checkByDiagonal(winCondition, downLeftCheck, [1, -1]);
 
-    // the count starts at 1 because is the position in which we currently are
-    return count === winCondition;
+    // 1 must be summed to the counters because is the position in which we currently are
+    const mainDiagonalCount = upRightCount + downLeftCount + 1;
+    const secondDiagonalCount = upLeftCount + downRightCount + 1;
+    return mainDiagonalCount === winCondition || secondDiagonalCount === winCondition;
   }
 
   checkForDraw(): boolean {
@@ -218,11 +219,10 @@ export default class SideStackerGame implements IGame {
   }
 
   checkForWin(player: string, row: number, column: number): boolean {
-    return (
-      this.checkHorizontalWin(player, row, column) ||
-      this.checkVerticalWin(player, row, column) ||
-      this.checkDiagonalWin(player, row, column)
-    );
+    const horizontalWin = this.checkHorizontalWin(player, row, column);
+    const verticalWin = this.checkVerticalWin(player, row, column);
+    const diagonalWin = this.checkDiagonalWin(player, row, column);
+    return horizontalWin || verticalWin || diagonalWin;
   }
 
   gameStatus() {
