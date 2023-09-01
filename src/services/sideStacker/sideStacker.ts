@@ -19,14 +19,22 @@ export default class SideStackerGame implements IGame {
     this.winnerId = null;
   }
 
+  getRandomTurn() {
+    // generates either 0 or 1 randomly
+    const randomIndex = Math.round(Math.random());
+    const player = this.players[randomIndex];
+    return player.id;
+  }
+
   start() {
     this.status = GameStatus.STARTED;
+    this.currentPlayer = this.getRandomTurn();
   }
 
   restart() {
     this.status = GameStatus.STARTED;
     this.board = Array.from({ length: 7 }, () => Array(7).fill(null));
-    this.currentPlayer = this.players.length ? this.players[0].id : null;
+    this.currentPlayer = null;
     this.moves = [];
     this.winnerId = null;
   }
@@ -39,14 +47,12 @@ export default class SideStackerGame implements IGame {
   addPlayer(player: Player) {
     this.players.push(player);
     if (this.players.length === 1) this.status = GameStatus.WAITING_FOR_SECOND_USER;
-    if (!this.currentPlayer) this.currentPlayer = player.id;
   }
 
   removePlayer(playerId: string) {
     const playerIndex = this.players.findIndex(player => player.id === playerId);
     this.players.splice(playerIndex, 1);
     if (this.players.length === 1) this.status = GameStatus.WAITING_FOR_SECOND_USER;
-    if (this.currentPlayer === playerId) this.currentPlayer = null;
   }
 
   fullRow(rIndex: number): boolean {
