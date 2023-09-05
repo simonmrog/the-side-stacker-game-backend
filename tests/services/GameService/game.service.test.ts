@@ -1,16 +1,16 @@
 import { promises as fs } from "fs";
 import path from "path";
 
-import { errorCatalog } from "../../src/config/errorCatalog";
-import { GameStatus, IMove } from "../../src/services/sideStacker/sideStacker.interface";
-import SideStackerGame from "../../src/services/sideStacker/sideStacker";
+import { errorCatalog } from "../../../src/config/errorCatalog";
+import { GameStatus, IMove } from "../../../src/services/GameService/game.interface";
+import GameService from "../../../src/services/GameService/game.service";
 
-describe("sideStacker service tests", () => {
-  let game: SideStackerGame;
+describe("GameService service tests", () => {
+  let game: GameService;
   const casesDir = path.join(__dirname, "/useCases");
 
   beforeEach(() => {
-    game = new SideStackerGame();
+    game = new GameService();
   });
 
   test("getRandomColor function should return a hsla color", () => {

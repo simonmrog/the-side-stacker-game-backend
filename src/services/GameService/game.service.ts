@@ -1,10 +1,11 @@
+import { IHSLColor } from "../../config/config.interface";
 import config from "../../config/config";
 import { errorCatalog } from "../../config/errorCatalog";
 import { IPlayer, Player } from "../../models/player";
-import { IGame, GameStatus, TBoard, TRow, TCell, IMove, IPositionInBoard } from "./sideStacker.interface";
+import { IGame, GameStatus, TBoard, TRow, TCell, IMove, IPositionInBoard } from "./game.interface";
 
 export default class SideStackerGame implements IGame {
-  private colorsBag: Array<number>;
+  private colorsBag: Array<IHSLColor>;
   public status: GameStatus = GameStatus.NOT_STARTED;
   public board: TBoard;
   public players: Array<IPlayer>;
@@ -13,7 +14,7 @@ export default class SideStackerGame implements IGame {
   public winnerId: string | null;
 
   constructor() {
-    this.colorsBag = config.GAME_COLOR_BAG;
+    this.colorsBag = [...config.GAME_COLOR_BAG];
     this.status = GameStatus.NOT_STARTED;
     this.board = Array.from({ length: 7 }, () => Array(7).fill(null));
     this.players = [];
@@ -24,9 +25,9 @@ export default class SideStackerGame implements IGame {
 
   getRandomColor(): string {
     const randomIndex = Math.floor(Math.random() * this.colorsBag.length);
-    const randomHue = this.colorsBag[randomIndex];
+    const randomColor = this.colorsBag[randomIndex];
     this.colorsBag.splice(randomIndex, 1);
-    return `hsla(${randomHue}, 100%, 70%, 1)`;
+    return `hsla(${randomColor.hue}, ${randomColor.saturation}%, ${randomColor.lightness}%, 1)`;
   }
 
   getRandomTurn(): string | null {
@@ -93,7 +94,6 @@ export default class SideStackerGame implements IGame {
     if (currentPlayerIndex === -1) throw new Error(errorCatalog.INVALID_GAME.NOT_ENOUGH_PLAYERS);
     const nextIndex = 1 - currentPlayerIndex;
     const nextPlayer = this.players[nextIndex];
-    console.log(this.players[nextIndex], nextIndex);
     if (!nextPlayer) throw new Error(errorCatalog.INVALID_PLAYER.PLAYER_NOT_FOUND);
     this.currentPlayer = nextPlayer.id;
   }

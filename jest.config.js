@@ -1,6 +1,6 @@
 export default {
   preset: "ts-jest",
-  testEnvironment: "jsdom",
+  testEnvironment: "node",
   transform: {
     "^.+\\.ts?$": "ts-jest",
   },
@@ -12,6 +12,7 @@ export default {
     "src/theme.ts",
     "src/setupTests.ts",
     "src/source.ts",
+    "dist/",
   ],
   collectCoverage: true,
   coverageDirectory: "coverage",
