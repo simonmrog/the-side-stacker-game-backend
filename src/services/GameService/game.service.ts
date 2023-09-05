@@ -44,6 +44,7 @@ export default class SideStackerGame implements IGame {
   }
 
   restart() {
+    this.colorsBag = [...config.GAME_COLOR_BAG];
     this.status = GameStatus.STARTED;
     this.board = Array.from({ length: 7 }, () => Array(7).fill(null));
     this.currentPlayer = this.getRandomTurn();
