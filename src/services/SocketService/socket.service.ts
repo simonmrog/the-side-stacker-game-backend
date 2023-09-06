@@ -2,7 +2,6 @@ import { Server as HTTPServer } from "http";
 import * as socketIO from "socket.io";
 
 import logger from "../../utils/logger";
-import config from "../../config/config";
 import { Player } from "../../models/player";
 import { ISocketService } from "./socket.interface";
 import { GameStatus, IMove } from "../GameService/game.interface";
@@ -18,7 +17,7 @@ export default class SocketService implements ISocketService {
       pingInterval: 2000, // ping the backend every two seconds
       pingTimeout: 5000, // if the backend does not receive a response between 5 seconds disconnects the user
       cors: {
-        origin: config.FRONTEND_URL,
+        origin: "*",
       },
     });
     logger.info("Socket connection established");
@@ -70,6 +69,8 @@ export default class SocketService implements ISocketService {
       // Update the state in the frontend when there is only one player in the game
       if (this.game?.status === GameStatus.WAITING_FOR_SECOND_USER)
         this.io.emit("waiting-for-second-user", this.game.getGameState());
+      else if (this.game?.status === GameStatus.STARTED || this.game?.status === GameStatus.FINISHED)
+        this.io.emit("game-busy");
 
       // Event triggered when the player presses the "new game" button
       socket.on("new-game", this.onNewGameEvent.bind(this));
@@ -104,7 +105,7 @@ export default class SocketService implements ISocketService {
             // then, remove the game instance
             this.game = null;
             logger.info("Game disconnected due to lack of players");
-            socket.broadcast.emit("game-disconnected", { player: socket.id, gameState: this.game });
+            socket.broadcast.emit("game-disconnected", { player: socket.id, gameState: null });
           }
         }
         logger.info("[Event]: User disconnected successfully:", reason);
