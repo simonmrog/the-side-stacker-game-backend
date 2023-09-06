@@ -16,7 +16,7 @@ export default class App {
     const app = express();
     app.use("/", router);
 
-    // Bare error Middleware
+    // Bare error Middleware (this needs more work to be production ready)
     app.use((err: Error, _req: Request, res: Response) => {
       logger.error(err.message, err);
       return res.status(500).json({
