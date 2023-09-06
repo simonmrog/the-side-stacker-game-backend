@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import http from "http";
 
 import logger from "./utils/logger";
@@ -15,6 +15,15 @@ export default class App {
     // Server Setup
     const app = express();
     app.use("/", router);
+
+    // Bare error Middleware
+    app.use((err: Error, _req: Request, res: Response) => {
+      logger.error(err.message, err);
+      return res.status(500).json({
+        error: err.message,
+      });
+    });
+
     this.server = http.createServer(app);
 
     // Socket Setup
