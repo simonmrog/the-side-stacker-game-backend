@@ -25,8 +25,14 @@ In the root directory of the project, you can run:
 
 Open [http://localhost:4200/health](http://localhost:4200/health) to view a basic health check of the api in the browser.
 
+You can also set another port using the PORT environment variable in a .env file in the root directory of the project.
+
 The project will reload if you make edits.\
 You will also see any lint errors in the console.
+
+The project has also a pre-commit system you can activate using
+
+- npm run prepare:husky
 
 You can also test the project using the following command:
 
@@ -40,7 +46,7 @@ To build the project you can run:
 
 and then:
 
-- npm start -> runs the transpiled bundle at port 4200 by default
+- npm start -> runs the transpiled bundle at port 4200 by default (or the port you choose in the .env file)
 
 ### `Using Docker`
 
