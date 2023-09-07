@@ -86,3 +86,13 @@ There is also a not found page to redirect whenever you enter a wrong url in the
 - When one of the players disconnects (or restarts the page) the game is closed
 - When the game is restarted the board is automatically updated
 - Each move is real time and you don't need to reload the page to see the changes
+
+### `Database`
+
+The application uses a PostgresDB database to record data about the game (this data could be use to generate statistics for example).
+
+To make this process easier, it is provided one database using the docker-compose.yml file, which is adapted to create one Postgres database on port 5432 and a PGAdmin instance on port 5050. You can always change this ports in the environment variables.
+
+The first time you enter to the PGAdmin platform (use http://localhost:5050) you've got to set up the database server. Use the name of the service set in the docker-compose "sidestacker-db" as the host (since all these services live in the same Docker network defined in the docker-compose). Then, enter the user, password and port. You will see the server in the Servers list, in the top left corner of the sidebar.
+
+You are ready to go!
