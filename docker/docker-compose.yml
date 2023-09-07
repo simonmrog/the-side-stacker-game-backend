@@ -20,5 +20,30 @@ services:
     networks:
       - sidestacker-network
 
+  sidestacker-db:
+    container_name: sidestacker-db
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: test_db
+    ports:
+      - "5432:5432"
+    networks:
+      - sidestacker-network
+
+  sidestacker-pgadmin:
+    container_name: sidestacker-pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
+    networks:
+      - sidestacker-network
+
 networks:
   sidestacker-network:
