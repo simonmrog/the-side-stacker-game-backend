@@ -104,14 +104,4 @@ describe("SocketService tests", () => {
 
     expect(onSpy).toBeCalled();
   });
-
-  // test("run function should create listeners to events", () => {
-  //   socket = new SocketService(httpServer);
-
-  //   socket.io.emit("message", "test-message");
-  //   ioClient.on("message", (message: unknown) => {
-  //     expect(typeof message === "string").toBe(true);
-  //     expect(message as string).toBe("tes2asdat-message");
-  //   });
-  // });
 });

@@ -1,7 +1,7 @@
 import { IHSLColor } from "../../config/config.interface";
 import config from "../../config/config";
 import { errorCatalog } from "../../config/errorCatalog";
-import { IPlayer, Player } from "../../models/player";
+import { IPlayer, Player } from "../../models/player.interface";
 import { IGame, GameStatus, TBoard, TRow, TCell, IMove, IPositionInBoard } from "./game.interface";
 
 export default class SideStackerGame implements IGame {

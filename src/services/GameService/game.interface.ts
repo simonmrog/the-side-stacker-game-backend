@@ -1,4 +1,4 @@
-import { IPlayer } from "../../models/player";
+import { IPlayer } from "../../models/player.interface";
 
 export interface IGame {
   start(): void;

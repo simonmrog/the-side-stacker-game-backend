@@ -2,7 +2,7 @@ import { Server as HTTPServer } from "http";
 import * as socketIO from "socket.io";
 
 import logger from "../../utils/logger";
-import { Player } from "../../models/player";
+import { Player } from "../../models/player.interface";
 import { ISocketService } from "./socket.interface";
 import { GameStatus, IMove } from "../GameService/game.interface";
 import GameService from "../GameService/game.service";
