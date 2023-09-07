@@ -2,8 +2,6 @@ import { IConfig } from "./config.interface";
 
 import "dotenv/config";
 
-console.log(process.env.PORT);
-
 function configFactory(): IConfig {
   return {
     ENV: process.env.NODE_ENV ?? "dev",
