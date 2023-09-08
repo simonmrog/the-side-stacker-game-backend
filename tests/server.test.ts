@@ -1,3 +1,5 @@
+jest.mock("../src/services/DatabaseService/database.service.ts");
+
 import App from "../src/server";
 
 jest.mock("../src/services/SocketService/socket.service"); // SoundPlayer is now a mock constructor

@@ -1,4 +1,4 @@
-import { IPlayer } from "../../models/player.interface";
+import { IPlayer } from "../../interfaces/player.interface";
 
 export interface IGame {
   start(): void;
@@ -9,6 +9,7 @@ export interface IGame {
 }
 
 export interface IGameState {
+  id: string;
   status: GameStatus;
   board: TBoard;
   players: Array<IPlayer>;

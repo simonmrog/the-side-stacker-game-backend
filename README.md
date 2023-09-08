@@ -95,4 +95,8 @@ To make this process easier, it is provided one database using the docker-compos
 
 The first time you enter to the PGAdmin platform (use http://localhost:5050) you've got to set up the database server. Use the name of the service set in the docker-compose "sidestacker-db" as the host (since all these services live in the same Docker network defined in the docker-compose). Then, enter the user, password and port. You will see the server in the Servers list, in the top left corner of the sidebar.
 
+The database has three tables: Game, Player and Moves to save a record of each game with its players and moves.
+
+![Database Models](./docs/diagram.png)
+
 You are ready to go!

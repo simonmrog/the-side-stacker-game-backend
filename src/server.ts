@@ -3,6 +3,7 @@ import http from "http";
 
 import logger from "./utils/logger";
 import router from "./routes";
+import databaseService from "./services/DatabaseService/database.service";
 import SocketService from "./services/SocketService/socket.service";
 
 export default class App {
@@ -31,7 +32,12 @@ export default class App {
     socketService.run();
   }
 
-  run(): void {
+  async run(): Promise<void> {
+    // Database setup
+    await databaseService.connect();
+    logger.info("Database has been initialized successfully");
+
+    // Starts the server
     this.server.listen(this.port, () => logger.info(`Server running on port ${this.port}`));
   }
 

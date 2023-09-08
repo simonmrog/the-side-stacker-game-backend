@@ -1,10 +1,13 @@
+import { v4 as uuidv4 } from "uuid";
+
 import { IHSLColor } from "../../config/config.interface";
 import config from "../../config/config";
 import { errorCatalog } from "../../config/errorCatalog";
-import { IPlayer, Player } from "../../models/player.interface";
-import { IGame, GameStatus, TBoard, TRow, TCell, IMove, IPositionInBoard } from "./game.interface";
+import { IPlayer, Player } from "../../interfaces/player.interface";
+import { IGame, IGameState, GameStatus, TBoard, TRow, TCell, IMove, IPositionInBoard } from "./game.interface";
 
 export default class SideStackerGame implements IGame {
+  public id: string;
   private colorsBag: Array<IHSLColor>;
   public status: GameStatus = GameStatus.NOT_STARTED;
   public board: TBoard;
@@ -14,6 +17,7 @@ export default class SideStackerGame implements IGame {
   public winnerId: string | null;
 
   constructor() {
+    this.id = uuidv4();
     this.colorsBag = [...config.GAME_COLOR_BAG];
     this.status = GameStatus.NOT_STARTED;
     this.board = Array.from({ length: 7 }, () => Array(7).fill(null));
@@ -231,8 +235,9 @@ export default class SideStackerGame implements IGame {
     return horizontalWin || verticalWin || diagonalWin;
   }
 
-  getGameState() {
+  getGameState(): IGameState {
     return {
+      id: this.id,
       status: this.status,
       players: this.players,
       board: this.board,

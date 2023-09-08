@@ -1,3 +1,5 @@
+jest.mock("../.../../../../src/services/DatabaseService/database.service.ts");
+
 import { createServer, Server as httpServer } from "http";
 import * as socketIO from "socket.io";
 import Client from "socket.io-client";
@@ -31,7 +33,7 @@ describe("SocketService tests", () => {
     expect(socket.io instanceof socketIO.Server).toBe(true);
   });
 
-  test("onCreateGameEvent function should create a new instance of the game and emit a 'new-game' event", () => {
+  test("onCreateGameEvent function should create a new instance of the game and emit a 'loading' event while it adds the game to DB", () => {
     socket = new SocketService(httpServer);
     const emitSpy = jest.spyOn(socket.io, "emit");
 
@@ -39,22 +41,20 @@ describe("SocketService tests", () => {
 
     expect(socket.game).not.toBeNull();
     expect(socket.io instanceof socketIO.Server).toBe(true);
-    expect(emitSpy).toBeCalledWith("game-created", socket.game!.getGameState());
+    expect(emitSpy).toBeCalledWith("loading", true);
   });
 
-  test("onJoinGameEvent function should add a player to the game and emit a 'player-joined' event", () => {
+  test("onJoinGameEvent function should add a player to the game and emit a 'loading' event", async () => {
     socket = new SocketService(httpServer);
     const emitSpy = jest.spyOn(socket.io, "emit");
 
     socket.onNewGameEvent(); // we need to create the game first
-    const player = socket.onJoinGameEvent("some-id");
 
     expect(socket.io instanceof socketIO.Server).toBe(true);
-    expect(socket.game!.players[0]).toStrictEqual(player);
-    expect(emitSpy).toBeCalledWith("player-joined", socket.game?.getGameState());
+    expect(emitSpy).toBeCalledWith("loading", true);
   });
 
-  test("onRestartGameEvent function should call the restart function and emit a 'game-restarted' event", () => {
+  test("onRestartGameEvent function should call the restart function and emit a 'loading' event", () => {
     socket = new SocketService(httpServer);
 
     socket.onNewGameEvent(); // we need to create the game first
@@ -65,7 +65,7 @@ describe("SocketService tests", () => {
 
     expect(socket.io instanceof socketIO.Server).toBe(true);
     expect(restartSpy).toBeCalled();
-    expect(emitSpy).toBeCalledWith("game-restarted", socket.game!.getGameState());
+    expect(emitSpy).toBeCalledWith("loading", true);
   });
 
   test("onMoveEvent function should call the handleTurn function and emit a 'player-moved' event", () => {
@@ -84,13 +84,16 @@ describe("SocketService tests", () => {
 
   test("onDisconnectEvent should remove the player disconnected", () => {
     socket = new SocketService(httpServer);
-    const playerId = "some-id";
+    const socketMock = {
+      id: "some-id",
+      emit: jest.fn(),
+    } as unknown as socketIO.Socket;
 
     socket.onNewGameEvent(); // start the game instance first
     const removePlayerSpy = jest.spyOn(socket.game!, "removePlayer");
-    socket.onJoinGameEvent(playerId); // adds the player to the game
+    socket.onJoinGameEvent(socketMock); // adds the player to the game
 
-    socket.onDisconnectEvent(playerId); // should remove the player from the game
+    socket.onDisconnectEvent(socketMock.id); // should remove the player from the game
 
     expect(removePlayerSpy).toBeCalled();
     expect(socket.game!.players.length).toBe(0);

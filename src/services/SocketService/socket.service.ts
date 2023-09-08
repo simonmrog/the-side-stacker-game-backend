@@ -2,10 +2,11 @@ import { Server as HTTPServer } from "http";
 import * as socketIO from "socket.io";
 
 import logger from "../../utils/logger";
-import { Player } from "../../models/player.interface";
+import { Player } from "../../interfaces/player.interface";
 import { ISocketService } from "./socket.interface";
 import { GameStatus, IMove } from "../GameService/game.interface";
 import GameService from "../GameService/game.service";
+import databaseService from "../DatabaseService/database.service";
 
 export default class SocketService implements ISocketService {
   public io: socketIO.Server;
@@ -23,29 +24,42 @@ export default class SocketService implements ISocketService {
     logger.info("Socket connection established");
   }
 
-  onNewGameEvent(): void {
+  async onNewGameEvent(): Promise<void> {
     logger.info("[Event]: new-game");
+    // creates the game instance
     this.game = new GameService();
-    this.io.emit("game-created", this.game.getGameState());
+    // adds the game data to the database
+    this.io.emit("loading", true);
+    await databaseService.createGame(this.game.getGameState());
+    this.io.emit("loading", false);
+    this.io.emit("game-created", this.game!.getGameState());
   }
 
-  onJoinGameEvent(playerId: string): Player | null {
+  async onJoinGameEvent(socket: socketIO.Socket): Promise<void> {
     logger.info("[Event]: join-game");
-    if (!this.game) return null;
+    if (!this.game) return;
     const randomColor = this.game.getRandomColor();
-    const playerIndex = this.game.players.findIndex(p => p.id === playerId);
+    const playerIndex = this.game.players.findIndex(p => p.id === socket.id);
     const name = playerIndex !== -1 ? `Player ${playerIndex + 1}` : `Player ${this.game.players.length + 1}`;
-    const player = new Player(playerId, randomColor, name);
+    const player = new Player(socket.id, randomColor, name);
+    // adds the player to the game instance
     this.game.addPlayer(player);
+    // adds the player to the database
+    this.io.emit("loading", true);
+    await databaseService.createPlayer(this.game.id, player);
+    this.io.emit("loading", false);
     if (this.game.players.length === 2) this.game.start();
     this.io.emit("player-joined", this.game.getGameState());
-    return player;
+    socket.emit("player-generated", player);
   }
 
-  onRestartGameEvent(): void {
+  async onRestartGameEvent(): Promise<void> {
     logger.info("[Event]: restart-game");
     if (!this.game) return;
     this.game.restart();
+    this.io.emit("loading", true);
+    await databaseService.updateGame(this.game);
+    this.io.emit("loading", false);
     this.io.emit("game-restarted", this.game.getGameState());
   }
 
@@ -53,6 +67,8 @@ export default class SocketService implements ISocketService {
     logger.info("[Event]: move");
     if (!this.game) return;
     this.game.handleTurn(playerId, move);
+    databaseService.createMove(playerId, move);
+    databaseService.updateGame(this.game);
     this.io.emit("player-moved", this.game.getGameState());
     if (this.game?.status === GameStatus.FINISHED) this.io.emit("game-finished", this.game.getGameState());
   }
@@ -73,16 +89,26 @@ export default class SocketService implements ISocketService {
         this.io.emit("game-busy");
 
       // Event triggered when the player presses the "new game" button
-      socket.on("new-game", this.onNewGameEvent.bind(this));
+      socket.on("new-game", async () => {
+        logger.info("[Event]: new-game");
+        // creates the game instance
+        this.game = new GameService();
+        // adds the game data to the database
+        this.io.emit("loading", true);
+        await databaseService.createGame(this.game.getGameState());
+        this.io.emit("loading", false);
+        this.io.emit("game-created", this.game!.getGameState());
+        // whenever the game is created, the player is joined automatically
+        await this.onJoinGameEvent(socket);
+      });
 
       // Event triggered when the player presses the "join game" button
-      socket.on("join-game", () => {
-        const player = this.onJoinGameEvent.call(this, socket.id);
-        socket.emit("player-generated", player);
+      socket.on("join-game", async () => {
+        await this.onJoinGameEvent(socket);
       });
 
       // Event triggered when the player presses the restart button
-      socket.on("restart-game", this.onRestartGameEvent.bind(this));
+      socket.on("restart-game", async () => await this.onRestartGameEvent());
 
       // Event triggered when the player presses the right or left button
       socket.on("move", (move: IMove) => {
