@@ -13,19 +13,13 @@ import { Player } from "./Player";
 
 @Entity("moves")
 export class Move extends BaseEntity {
-  @PrimaryGeneratedColumn({
-    type: "numeric",
-  })
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({
-    type: "numeric",
-  })
+  @Column("int")
   row: number;
 
-  @Column({
-    type: "varchar",
-  })
+  @Column("text")
   side: string;
 
   @CreateDateColumn()

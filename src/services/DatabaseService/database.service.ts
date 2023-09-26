@@ -24,6 +24,7 @@ class DatabaseService {
   }
 
   connect() {
+    logger.info("Connecting to database...");
     return this.dataSource.initialize();
   }
 

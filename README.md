@@ -12,7 +12,7 @@ Both projects connect each other real time using socket.io implementations and p
 ## Quickstart
 
 Prerequisites:
-[Node and NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) or [Docker](https://docs.docker.com/get-docker/) and [Docker-compose](https://docs.docker.com/compose/install/#install-using-pip)
+[Node(v18.16.0) and NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) or [Docker](https://docs.docker.com/get-docker/) and [Docker-compose](https://docs.docker.com/compose/install/#install-using-pip)
 
 First of all, we need to have a postgres instance running on the machine.
 

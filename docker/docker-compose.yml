@@ -22,7 +22,7 @@ services:
 
   sidestacker-db:
     container_name: sidestacker-db
-    image: postgres
+    image: postgres:14.1-alpine
     restart: always
     environment:
       - POSTGRES_USER=${POSTGRES_USER}

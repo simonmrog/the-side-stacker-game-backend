@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 import config from "./src/config/config";
 import App from "./src/server";
 
