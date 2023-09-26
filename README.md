@@ -7,12 +7,18 @@ The full project consists in two parts:
 - A frontend developed using React with TypeScript
 - A backend developed using NodeJS and TypeScript
 
-Both projects connect each other real time using socket.io implementations.
+Both projects connect each other real time using socket.io implementations and persist data in a PostgreSQL database.
 
 ## Quickstart
 
 Prerequisites:
 [Node and NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) or [Docker](https://docs.docker.com/get-docker/) and [Docker-compose](https://docs.docker.com/compose/install/#install-using-pip)
+
+First of all, we need to have a postgres instance running on the machine.
+
+If you don't have one, you'll need to have Docker and Docker-Compose, since the docker-compose in the root directory comes with a database instance called sidestacker-db which you can run using the command:
+
+- docker compose -f docker/docker-compose.yml --env-file ./.env up sidestacker-db
 
 You can run the project locally in two ways:
 
@@ -20,8 +26,8 @@ You can run the project locally in two ways:
 
 In the root directory of the project, you can run:
 
-- npm install -> install the dependencies
-- npm run dev -> runs the project in the port 4200 by default
+- npm ci -> install the dependencies using the package-lock.json to preserve the dependency versions.
+- npm run dev -> runs the project in the port 4200 by default.
 
 Open [http://localhost:4200/health](http://localhost:4200/health) to view a basic health check of the api in the browser.
 
@@ -56,10 +62,19 @@ In the root directory of the project, you first need to set the environment vari
 - NODE_ENV=
 - PORT=
 - FRONTEND_URL=
+- POSTGRES_HOST=
+- POSTGRES_USER=
+- POSTGRES_PASSWORD=
+- POSTGRES_DB=
+- POSTGRES_PORT=
+- PGADMIN_DEFAULT_EMAIL=
+- PGADMIN_DEFAULT_PASSWORD=
 
 Once the environment variables are set, you can run:
 
-- docker compose -f docker/docker-compose.yml --env-file ./.env up
+- docker compose -f docker/docker-compose.yml --env-file ./.env up {{service_name}}
+
+Where service_name is one of the services in the docker-compose: sidestacker-backend, sidestacker-db and sidestacker-pgadmin
 
 This will bootstrap and expose the container to http://localhost:PORT
 
@@ -89,11 +104,11 @@ There is also a not found page to redirect whenever you enter a wrong url in the
 
 ### `Database`
 
-The application uses a PostgresDB database to record data about the game (this data could be use to generate statistics for example).
+The application uses a PostgresDB database to record data about the game (this data could be used for instance to generate statistics or to train ML models).
 
 To make this process easier, it is provided one database using the docker-compose.yml file, which is adapted to create one Postgres database on port 5432 and a PGAdmin instance on port 5050. You can always change this ports in the environment variables.
 
-The first time you enter to the PGAdmin platform (use http://localhost:5050) you've got to set up the database server. Use the name of the service set in the docker-compose "sidestacker-db" as the host (since all these services live in the same Docker network defined in the docker-compose). Then, enter the user, password and port. You will see the server in the Servers list, in the top left corner of the sidebar.
+The first time you enter to the PGAdmin platform (use http://localhost:5050) you've got to set up the database server. Use the name of the service set in the docker-compose "sidestacker-db" as the host (since all these services lie within the same Docker network defined in the docker-compose). Then, enter the user, password and port. You will see the server in the Servers list, in the top left corner of the sidebar.
 
 The database has three tables: Game, Player and Moves to save a record of each game with its players and moves.
 
