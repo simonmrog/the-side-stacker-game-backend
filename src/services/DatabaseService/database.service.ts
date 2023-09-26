@@ -24,7 +24,7 @@ class DatabaseService {
   }
 
   connect() {
-    logger.info("Connecting to database...");
+    logger.info(`Connecting to database... ${config.POSTGRES_HOST}:${config.POSTGRES_PORT}`);
     return this.dataSource.initialize();
   }
 
